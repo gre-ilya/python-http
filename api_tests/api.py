@@ -42,7 +42,7 @@ class Request:
             self.send_request_sync(url, headers)
             stop = int(time() * 1000)
             time_sum += stop - start
-            print(f' Request {i + 1:4d}: Worked in {stop - start} ms. Response code: {self.res.code}')
+            print(f'[Request {i + 1:4d}] Code: {self.res.code} Worked in {stop - start} ms.')
         return time_sum
 
     def print_response(self) -> None:
