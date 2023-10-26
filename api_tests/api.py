@@ -2,6 +2,7 @@ from PIL import Image
 import io
 import http.client
 from time import time
+import json
 
 
 class Request:
@@ -9,6 +10,7 @@ class Request:
         self.host = host
         self.port = port
         self.image_byte_array = None
+        self.res = None
 
     def load_image(self, filename: str) -> None:
         """
@@ -23,7 +25,8 @@ class Request:
     def send_request(self, url: str, headers: dict):
         conn = http.client.HTTPConnection('localhost', 80)
         conn.request('POST', url, headers=headers, body=self.image_byte_array)
-        return conn.getresponse()
+        self.res = conn.getresponse()
+        return self.res
 
     def get_request_time(self, url: str, headers: dict, request_count: int) -> int:
         """Sends http request request_count times and returns sum of time for response waiting
@@ -39,3 +42,17 @@ class Request:
             stop = int(time() * 1000)
             time_sum += stop - start
         return time_sum
+
+    def print_response(self) -> None:
+        if not self.res:
+            return
+
+        json_string = self.res.read().decode()
+        json_f = json.loads(json_string)
+        for key in json_f.keys():
+            print(f'{key}: {json_f[key]}')
+            # if isinstance(json_f[key], list):
+            #     for measure in json_f[key]:
+            #         print(measure)
+
+        # print(json.loads(tmp))
