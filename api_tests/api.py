@@ -11,6 +11,7 @@ class Request:
         self.port = port
         self.image_byte_array = None
         self.res = None
+        self.conn = None
 
     def load_image(self, filename: str) -> None:
         """
@@ -22,13 +23,13 @@ class Request:
         image.save(self.image_byte_array, format=image.format)
         self.image_byte_array = self.image_byte_array.getvalue()
 
-    def send_request(self, url: str, headers: dict):
-        conn = http.client.HTTPConnection('localhost', 80)
+    def send_request_sync(self, url: str, headers: dict):
+        conn = http.client.HTTPConnection(self.host, self.port)
         conn.request('POST', url, headers=headers, body=self.image_byte_array)
         self.res = conn.getresponse()
         return self.res
 
-    def get_request_time(self, url: str, headers: dict, request_count: int) -> int:
+    def get_request_time_sync(self, url: str, headers: dict, request_count: int) -> int:
         """Sends http request request_count times and returns sum of time for response waiting
         :param str url: Request url
         :param dict headers: Dict with http headers for request
@@ -38,9 +39,10 @@ class Request:
         time_sum = 0
         for i in range(request_count):
             start = int(time() * 1000)
-            self.send_request(url, headers)
+            self.send_request_sync(url, headers)
             stop = int(time() * 1000)
             time_sum += stop - start
+            print(f' Request {i + 1:4d}: Worked in {stop - start} ms. Response code: {self.res.code}')
         return time_sum
 
     def print_response(self) -> None:
